@@ -1,0 +1,12 @@
+.container {
+    display: flex;
+}
+
+#game {
+    background-color: grey;
+    padding: 0;
+    margin: auto;
+    margin-top: 30px;
+    display: block;
+    border: 1px solid white;
+}
