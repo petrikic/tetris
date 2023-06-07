@@ -1,28 +1,70 @@
+import Block from "./Block.js";
+import Tetramino from "./Tetramino.js";
+import TetraminoShapeI from "./TetraminoShapeI.js";
+import TetraminoShapeJ from "./TetraminoShapeJ.js";
+import TetraminoShapeL from "./TetraminoShapeL.js";
+import TetraminoShapeO from "./TetraminoShapeO.js";
+import TetraminoShapeS from "./TetraminoShapeS.js";
+import TetraminoShapeT from "./TetraminoShapeT.js";
+import TetraminoShapeZ from "./TetraminoShapeZ.js";
 let canvas, ctx;
 
-function createMatrix(x, y) {
-    let lineArr = [];
-    for(let i = 0; i < y; i++) {
-        lineArr.push(new Array(x));
-    }
-    return lineArr;
+function createMatrix(sizeX, sizeY) {
+	let matrix = [];
+	for (let y = 0; y < sizeY; y++) {
+		matrix[y] = [];
+		for(let x = 0; x < sizeX; x++) {
+			matrix[y][x] = new Block("black")
+		}
+	}
+
+	console.log(matrix)
+	return matrix;
 }
 
-function drawField(field, x, y, size){
-    for(let i = 0; i < x; i++){
-        for(let j = 0; j < y; j++){
-            if(field[i][j] === undefined) {
-                ctx.fillRect((i*(size+1)), (j*(size+1)), size, size);
-            }
-        }
-    }
+function drawField(field, x, y, blockSize) {
+	for (let i = 0; i < x; i++) {
+		for (let j = 0; j < y; j++) {
+			const block = field[j][i];
+			drawBlock(i, j, block, blockSize);
+		}
+	}
+}
+
+function drawTetramino(tetramino, blockSize) {
+	console.log(tetramino);
+	const blocks = tetramino.blocks;
+
+	for (let y = 0; y < blocks.length; y++) {
+		for (let x = 0; x < blocks[y].length; x++) {
+			const block = blocks[y][x];
+			if(block)
+				drawBlock(x + tetramino.currentX, y + tetramino.currentY, block, blockSize);
+		}
+	}
+}
+
+function drawBlock(x, y, block, blockSize) {
+	const xPos = x * (blockSize + 1);
+	const yPos = y * (blockSize + 1);
+	ctx.fillStyle = block.color;
+	ctx.fillRect(xPos, yPos, blockSize, blockSize);
 }
 
 function main() {
-    canvas = document.getElementById("game");
-    ctx = canvas.getContext('2d');
-    let field = createMatrix(10, 20);
-    drawField(field, 10, 20, 30);
+	const fieldSizeX = 10;
+	const fieldSizeY = 20;
+	const blockSize = 30; 
+
+	canvas = document.getElementById("game");
+	ctx = canvas.getContext("2d");
+	const field = createMatrix(fieldSizeX, fieldSizeY);
+	drawField(field, fieldSizeX, fieldSizeY, blockSize);
+
+	const tetramino = new Tetramino(new TetraminoShapeZ(), 10);
+	tetramino.rotateClockwise();
+	tetramino.rotateClockwise();
+	drawTetramino(tetramino, blockSize);
 }
 
 main();
