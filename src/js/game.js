@@ -11,6 +11,8 @@ import TetraminoShapeZ from "./TetraminoShapeZ.js";
 let canvas, ctx;
 let currentTetramino;
 let matrix;
+let tickInterval;
+let isGameStarted;
 
 function createMatrix(sizeX, sizeY) {
 	let matrix = [];
@@ -74,6 +76,7 @@ function moveDown() {
 
 	if(currentTetramino.startY == currentTetramino.currentY) {
 		alert("Game over!");
+		clearInterval(tickInterval);
 		return;
 	}
 
@@ -114,6 +117,9 @@ function keyMap() {
 	};
 
 	document.addEventListener("keydown", function (event) {
+		if(!isGameStarted)
+			return;
+
 		const key = event.key;
 
 		if (keyActions.hasOwnProperty(key)) {
@@ -139,6 +145,16 @@ function getRandomTetramino() {
 	return new Tetramino(getRandomShape(), fieldSizeX);
 }
 
+function tick() {
+	moveDown();
+	gameUpdate();
+}
+
+function startGame() {
+	tickInterval = setInterval(tick, 500)
+	isGameStarted = true;
+}
+
 const fieldSizeX = 10;
 const fieldSizeY = 20;
 const blockSize = 30;
@@ -162,6 +178,7 @@ function main() {
 	gameUpdate();
 
 	keyMap();
+	startGame();
 }
 
 main();
