@@ -7,7 +7,10 @@ import TetraminoShapeO from "./TetraminoShapeO.js";
 import TetraminoShapeS from "./TetraminoShapeS.js";
 import TetraminoShapeT from "./TetraminoShapeT.js";
 import TetraminoShapeZ from "./TetraminoShapeZ.js";
+
 let canvas, ctx;
+let currentTetramino;
+let matrix;
 
 function createMatrix(sizeX, sizeY) {
 	let matrix = [];
@@ -54,18 +57,111 @@ function drawBlock(x, y, block, blockSize) {
 	ctx.fillRect(xPos, yPos, blockSize, blockSize);
 }
 
-function main() {
-	const fieldSizeX = 10;
-	const fieldSizeY = 20;
-	const blockSize = 30;
+function moveLeft() {
+	if (currentTetramino.canTranslateLeft(matrix)) currentTetramino.moveLeft();
+}
 
+function moveRight() {
+	if (currentTetramino.canTranslateRight(matrix))
+		currentTetramino.moveRight();
+}
+
+function moveDown() {
+	if (currentTetramino.canTranslateDown(matrix)) {
+		currentTetramino.moveDown();
+		return;
+	}
+
+	if(currentTetramino.startY == currentTetramino.currentY) {
+		alert("Game over!");
+		return;
+	}
+
+	applyTetramino();
+	currentTetramino = getRandomTetramino();
+}
+
+function rotateClockwise() {
+	currentTetramino.rotateClockwise();
+}
+
+function applyTetramino() {
+	const blocks = currentTetramino.blocks;
+	const currentX = currentTetramino.currentX;
+	const currentY = currentTetramino.currentY;
+
+	for (let y = 0; y < blocks.length; y++) {
+		for (let x = 0; x < blocks[y].length; x++) {
+			const block = blocks[y][x];
+			const canApplly = currentX + x >= 0 && currentY + y >= 0;
+			if (block && canApplly)
+				matrix[y + currentTetramino.currentY][
+					x + currentTetramino.currentX
+				] = block;
+		}
+	}
+}
+
+function keyMap() {
+	const keyActions = {
+		ArrowLeft: moveLeft,
+		ArrowRight: moveRight,
+		ArrowDown: moveDown,
+		ArrowUp: rotateClockwise,
+		default: function (key) {
+			console.log(`Tecla "${key}" pressionada!`);
+		},
+	};
+
+	document.addEventListener("keydown", function (event) {
+		const key = event.key;
+
+		if (keyActions.hasOwnProperty(key)) {
+			keyActions[key]();
+			gameUpdate();
+		} else {
+			keyActions.default(key);
+		}
+	});
+}
+
+function gameUpdate() {
+	drawField(matrix, fieldSizeX, fieldSizeY, blockSize);
+	drawTetramino(currentTetramino, blockSize);
+}
+
+function getRandomShape() {
+	const randomIndex = Math.floor(Math.random() * shapes.length);
+	return shapes[randomIndex];
+}
+
+function getRandomTetramino() {
+	return new Tetramino(getRandomShape(), fieldSizeX);
+}
+
+const fieldSizeX = 10;
+const fieldSizeY = 20;
+const blockSize = 30;
+
+const shapes = [
+	new TetraminoShapeI(),
+	new TetraminoShapeJ(),
+	new TetraminoShapeL(),
+	new TetraminoShapeO(),
+	new TetraminoShapeS(),
+	new TetraminoShapeT(),
+	new TetraminoShapeZ(),
+];
+
+function main() {
 	canvas = document.getElementById("game");
 	ctx = canvas.getContext("2d");
-	const field = createMatrix(fieldSizeX, fieldSizeY);
-	drawField(field, fieldSizeX, fieldSizeY, blockSize);
+	matrix = createMatrix(fieldSizeX, fieldSizeY);
 
-	const tetramino = new Tetramino(new TetraminoShapeJ(), 10);
-	drawTetramino(tetramino, blockSize);
+	currentTetramino = getRandomTetramino();
+	gameUpdate();
+
+	keyMap();
 }
 
 main();
