@@ -5,7 +5,6 @@ class TetraminoShapeL extends TetraminoShape {
 		const shape = [
 			[1, 0],
 			[1, 0],
-			[1, 0],
 			[1, 1],
 		];
 		super(shape, "orange");
