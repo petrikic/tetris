@@ -85,7 +85,8 @@ function moveDown() {
 }
 
 function rotateClockwise() {
-	currentTetramino.rotateClockwise();
+	if(currentTetramino.canRotateClockwise(matrix))
+		currentTetramino.rotateClockwise();
 }
 
 function applyTetramino() {

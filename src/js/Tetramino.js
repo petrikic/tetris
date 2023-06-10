@@ -35,6 +35,18 @@ class Tetramino {
         console.log(this.currentX + ", " + this.currentY);
     }
 
+    canRotateClockwise(matrix) {
+        return this.canRotate(this.tetraminoRotatedClockwised(), matrix);
+    }
+
+    canRotateConterClockwise(matrix) {
+        return this.canRotate(this.tetraminoRotatedCounterClockwised(), matrix);
+    }
+
+    canRotate(blocks, matrix) {
+        return this.canTranslate(this.rotateOffsetX(), this.rotateOffsetY(), blocks, matrix);
+    }
+
     canTranslateLeft(matrix) {
         return this.canTranslate(-1, 0, this.blocks, matrix);
     }
@@ -49,9 +61,9 @@ class Tetramino {
 
     canRotateClockWise(matrix) {
         return this.canTranslate(
-            this.translatePositionX(),
-            this.translatePositionY(),
-            this.tetraminoRortatedClockwised(),
+            this.rotateOffsetX(),
+            this.rotateOffsetY(),
+            this.tetraminoRotatedClockwised(),
             matrix
         );
     }
@@ -100,18 +112,18 @@ class Tetramino {
     }
 
     updateCurrentPosition() {
-        this.currentX = this.currentX + this.translatePositionX();
-        this.currentY = this.currentY + this.translatePositionY();
+        this.currentX = this.currentX + this.rotateOffsetX();
+        this.currentY = this.currentY + this.rotateOffsetY();
     }
 
-    translatePositionX() {
+    rotateOffsetX() {
         return -(
             Math.floor(this.blocks.length / 2) -
             Math.floor(this.blocks[0].length / 2)
         );
     }
 
-    translatePositionY() {
+    rotateOffsetY() {
         return -(
             Math.floor(this.blocks[0].length / 2) -
             Math.floor(this.blocks.length / 2)
@@ -120,7 +132,7 @@ class Tetramino {
 
     rotateClockwise() {
         this.updateCurrentPosition();
-        this.blocks = this.tetraminoRortatedClockwised();
+        this.blocks = this.tetraminoRotatedClockwised();
     }
 
     rotateCounterClockwise() {
@@ -128,7 +140,7 @@ class Tetramino {
         this.blocks = this.tetraminoRotatedCounterClockwised();
     }
 
-    tetraminoRortatedClockwised() {
+    tetraminoRotatedClockwised() {
         const oldRows = this.blocks.length;
         const oldCols = this.blocks[0].length;
         const newMatrix = [];
