@@ -8,7 +8,8 @@ import TetraminoShapeS from "./TetraminoShapeS.js";
 import TetraminoShapeT from "./TetraminoShapeT.js";
 import TetraminoShapeZ from "./TetraminoShapeZ.js";
 
-let canvas, ctx;
+import CanvasController from "./CanvasController.js";
+
 let currentTetramino;
 let matrix;
 let tickInterval;
@@ -24,39 +25,6 @@ function createMatrix(sizeX, sizeY) {
 	}
 
 	return matrix;
-}
-
-function drawField(field, x, y, blockSize) {
-	for (let i = 0; i < x; i++) {
-		for (let j = 0; j < y; j++) {
-			const block = field[j][i];
-			drawBlock(i, j, block, blockSize);
-		}
-	}
-}
-
-function drawTetramino(tetramino, blockSize) {
-	const blocks = tetramino.blocks;
-
-	for (let y = 0; y < blocks.length; y++) {
-		for (let x = 0; x < blocks[y].length; x++) {
-			const block = blocks[y][x];
-			if (block)
-				drawBlock(
-					x + tetramino.currentX,
-					y + tetramino.currentY,
-					block,
-					blockSize
-				);
-		}
-	}
-}
-
-function drawBlock(x, y, block, blockSize) {
-	const xPos = x * (blockSize + 1);
-	const yPos = y * (blockSize + 1);
-	ctx.fillStyle = block.color;
-	ctx.fillRect(xPos, yPos, blockSize, blockSize);
 }
 
 function moveLeft() {
@@ -133,8 +101,8 @@ function keyMap() {
 }
 
 function gameUpdate() {
-	drawField(matrix, fieldSizeX, fieldSizeY, blockSize);
-	drawTetramino(currentTetramino, blockSize);
+	canvasContrller.drawField(matrix, fieldSizeX, fieldSizeY, blockSize);
+	canvasContrller.drawTetramino(currentTetramino, blockSize);
 }
 
 function getRandomShape() {
@@ -170,9 +138,11 @@ const shapes = [
 	new TetraminoShapeZ(),
 ];
 
+let canvasContrller;
+
 function main() {
-	canvas = document.getElementById("game");
-	ctx = canvas.getContext("2d");
+	canvasContrller = new CanvasController(blockSize);
+
 	matrix = createMatrix(fieldSizeX, fieldSizeY);
 
 	currentTetramino = getRandomTetramino();
