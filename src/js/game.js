@@ -9,8 +9,8 @@ import TetraminoShapeT from "./TetraminoShapeT.js";
 import TetraminoShapeZ from "./TetraminoShapeZ.js";
 
 import CanvasController from "./CanvasController.js";
+import MotionController from "./MotionController.js";
 
-let currentTetramino;
 let matrix;
 let tickInterval;
 let isGameStarted;
@@ -27,37 +27,9 @@ function createMatrix(sizeX, sizeY) {
 	return matrix;
 }
 
-function moveLeft() {
-	if (currentTetramino.canTranslateLeft(matrix)) currentTetramino.moveLeft();
-}
-
-function moveRight() {
-	if (currentTetramino.canTranslateRight(matrix))
-		currentTetramino.moveRight();
-}
-
-function moveDown() {
-	if (currentTetramino.canTranslateDown(matrix)) {
-		currentTetramino.moveDown();
-		return;
-	}
-
-	if(currentTetramino.startY == currentTetramino.currentY) {
-		alert("Game over!");
-		clearInterval(tickInterval);
-		return;
-	}
-
-	applyTetramino();
-	currentTetramino = getRandomTetramino();
-}
-
-function rotateClockwise() {
-	if(currentTetramino.canRotateClockwise(matrix))
-		currentTetramino.rotateClockwise();
-}
-
 function applyTetramino() {
+	const currentTetramino = gameController.currentTetramino;
+
 	const blocks = currentTetramino.blocks;
 	const currentX = currentTetramino.currentX;
 	const currentY = currentTetramino.currentY;
@@ -74,35 +46,21 @@ function applyTetramino() {
 	}
 }
 
-function keyMap() {
-	const keyActions = {
-		ArrowLeft: moveLeft,
-		ArrowRight: moveRight,
-		ArrowDown: moveDown,
-		ArrowUp: rotateClockwise,
-		default: function (key) {
-			console.log(`Tecla "${key}" pressionada!`);
-		},
-	};
+function checkGameStatus() {
+	const currentTetramino = gameController.currentTetramino;
+	if (currentTetramino.startY == currentTetramino.currentY) {
+		alert("Game over!");
+		clearInterval(tickInterval);
+		return;
+	}
 
-	document.addEventListener("keydown", function (event) {
-		if(!isGameStarted)
-			return;
-
-		const key = event.key;
-
-		if (keyActions.hasOwnProperty(key)) {
-			keyActions[key]();
-			gameUpdate();
-		} else {
-			keyActions.default(key);
-		}
-	});
+	applyTetramino();
+	gameController.currentTetramino = getRandomTetramino();
 }
 
 function gameUpdate() {
 	canvasContrller.drawField(matrix, fieldSizeX, fieldSizeY, blockSize);
-	canvasContrller.drawTetramino(currentTetramino, blockSize);
+	canvasContrller.drawTetramino(gameController.currentTetramino, blockSize);
 }
 
 function getRandomShape() {
@@ -115,13 +73,13 @@ function getRandomTetramino() {
 }
 
 function tick() {
-	moveDown();
+	motionController.moveDown();
 	gameUpdate();
 }
 
 function startGame() {
-	tickInterval = setInterval(tick, 500)
-	isGameStarted = true;
+	tickInterval = setInterval(tick, 500);
+	gameController.isGameStarted = true;
 }
 
 const fieldSizeX = 10;
@@ -139,16 +97,25 @@ const shapes = [
 ];
 
 let canvasContrller;
+let motionController;
+let gameController;
 
 function main() {
-	canvasContrller = new CanvasController(blockSize);
-
 	matrix = createMatrix(fieldSizeX, fieldSizeY);
 
-	currentTetramino = getRandomTetramino();
-	gameUpdate();
+	//FIXME - Criar a controller para o game.
+	gameController = {
+		isGameStarted: isGameStarted,
+		currentTetramino: getRandomTetramino(),
+		matrix: matrix,
+		updateGame: gameUpdate,
+		checkGameStatus: checkGameStatus,
+	};
 
-	keyMap();
+	canvasContrller = new CanvasController(blockSize);
+	motionController = new MotionController(gameController);
+
+	gameUpdate();
 	startGame();
 }
 
