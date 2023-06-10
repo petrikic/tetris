@@ -11,13 +11,19 @@ import TetraminoShapeZ from "./TetraminoShapeZ.js";
 import CanvasController from "./CanvasController.js";
 import MotionController from "./MotionController.js";
 
+function createLine(sizeX) {
+	let line = []
+	for (let x = 0; x < sizeX; x++) {
+		line[x] = new EmptyBlock();
+	}
+
+	return line;
+}
+
 function createMatrix(sizeX, sizeY) {
 	let matrix = [];
 	for (let y = 0; y < sizeY; y++) {
-		matrix[y] = [];
-		for (let x = 0; x < sizeX; x++) {
-			matrix[y][x] = new EmptyBlock();
-		}
+		matrix[y] = createLine(sizeX);
 	}
 
 	return matrix;
@@ -27,6 +33,16 @@ const fieldSizeX = 10;
 const fieldSizeY = 20;
 const blockSize = 30;
 
+const shapes = [
+	new TetraminoShapeI(),
+	new TetraminoShapeJ(),
+	new TetraminoShapeL(),
+	new TetraminoShapeO(),
+	new TetraminoShapeS(),
+	new TetraminoShapeT(),
+	new TetraminoShapeZ(),
+];
+
 class GameController {
 	constructor() {
 		this.tickInterval = undefined;
@@ -34,16 +50,6 @@ class GameController {
 		this.matrix = createMatrix(fieldSizeX, fieldSizeY);
 		this.canvasController = new CanvasController(blockSize);
 		this.motionController = new MotionController(this);
-
-		this.shapes = [
-			new TetraminoShapeI(),
-			new TetraminoShapeJ(),
-			new TetraminoShapeL(),
-			new TetraminoShapeO(),
-			new TetraminoShapeS(),
-			new TetraminoShapeT(),
-			new TetraminoShapeZ(),
-		];
 
 		this.currentTetramino = this.getRandomTetramino();
 	}
@@ -60,11 +66,30 @@ class GameController {
 			for (let x = 0; x < blocks[y].length; x++) {
 				const block = blocks[y][x];
 				const canApplly = currentX + x >= 0 && currentY + y >= 0;
-				if (block && canApplly)
+				if (block && canApplly) {
 					matrix[y + currentTetramino.currentY][
 						x + currentTetramino.currentX
 					] = block;
+
+					this.checkLine(y + currentTetramino.currentY, this.matrix);
+				}
 			}
+		}
+	}
+
+	checkLine(line, matrix) {
+		let canClearLine = true;
+
+		matrix[line].forEach(
+			(block) => {
+				if(block instanceof EmptyBlock)
+					canClearLine = false;
+			}
+		);
+
+		if(canClearLine){
+			matrix.splice(line, 1);
+			matrix.unshift(createLine(fieldSizeX))
 		}
 	}
 
@@ -91,8 +116,8 @@ class GameController {
 	}
 
 	getRandomShape() {
-		const randomIndex = Math.floor(Math.random() * this.shapes.length);
-		return this.shapes[randomIndex];
+		const randomIndex = Math.floor(Math.random() * shapes.length);
+		return shapes[randomIndex];
 	}
 
 	getRandomTetramino() {
